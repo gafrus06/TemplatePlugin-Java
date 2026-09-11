@@ -19,3 +19,9 @@ permissions:
   joybank.admin.give:
     description: Позволяет выдавать монеты Джой
     default: op
+  joybank.atm.create:
+    description: Позволяет создавать банкоматы
+    default: op
+  joybank.atm.break:
+    description: Позволяет удалять зарегистрированные банкоматы
+    default: op

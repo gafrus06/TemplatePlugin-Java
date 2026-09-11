@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AccountRepository {
+
     long getBalance(UUID playerId);
 
-    void setBalance(UUID playerId, long balance);
-    void addTransaction(
+    void applyTransaction(
             UUID playerId,
+            long newBalance,
             Transaction transaction
     );
 

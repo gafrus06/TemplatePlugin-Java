@@ -4,6 +4,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.joutak.template.bank.Transaction;
 import ru.joutak.template.bank.TransactionType;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,35 +45,80 @@ public class YamlAccountRepository implements AccountRepository {
     }
 
     @Override
-    public void setBalance(UUID playerId, long balance) {
-        String path = "players." + playerId + ".balance";
-
-        configuration.set(path, balance);
-
-        save();
-    }
-
-    @Override
-    public void addTransaction(
+    public void applyTransaction(
             UUID playerId,
+            long newBalance,
             Transaction transaction
     ) {
-        String path = "players." + playerId + ".transactions";
 
-        List<Map<?, ?>> transactions =
-                new ArrayList<>(configuration.getMapList(path));
+        if (newBalance < 0) {
+            throw new IllegalArgumentException(
+                    "Баланс не может быть отрицательным"
+            );
+        }
 
-        Map<String, Object> data = new HashMap<>();
+        String playerPath =
+                "players." + playerId;
+        String balancePath =
+                playerPath + ".balance";
+        String transactionsPath =
+                playerPath + ".transactions";
+        Object oldBalance =
+                configuration.get(balancePath);
 
-        data.put("type", transaction.type().name());
-        data.put("amount", transaction.amount());
-        data.put("timestamp", transaction.timestamp().toString());
+        List<Map<?, ?>> oldTransactions =
+                new ArrayList<>(
+                        configuration.getMapList(
+                                transactionsPath
+                        )
+                );
+        List<Map<?, ?>> newTransactions =
+                new ArrayList<>(oldTransactions);
 
-        transactions.add(data);
+        Map<String, Object> data =
+                new HashMap<>();
+        data.put(
+                "type",
+                transaction.type().name()
+        );
+        data.put(
+                "amount",
+                transaction.amount()
+        );
+        data.put(
+                "timestamp",
+                transaction.timestamp().toString()
+        );
+        newTransactions.add(data);
 
-        configuration.set(path, transactions);
+        try {
 
-        save();
+            configuration.set(
+                    balancePath,
+                    newBalance
+            );
+
+            configuration.set(
+                    transactionsPath,
+                    newTransactions
+            );
+
+            save();
+
+        } catch (RuntimeException e) {
+
+            configuration.set(
+                    balancePath,
+                    oldBalance
+            );
+
+            configuration.set(
+                    transactionsPath,
+                    oldTransactions
+            );
+
+            throw e;
+        }
     }
 
     @Override
@@ -114,15 +164,51 @@ public class YamlAccountRepository implements AccountRepository {
     }
 
     private void save() {
+
+        Path target = file.toPath();
+
+        Path temp = target.resolveSibling(
+                file.getName() + ".tmp"
+        );
+
         try {
-            configuration.save(file);
-        } catch (IOException e) {
-            plugin.getLogger().severe(
-                    "Не удалось сохранить accounts.yml: " + e.getMessage()
+
+            String yaml =
+                    configuration.saveToString();
+
+            Files.writeString(
+                    temp,
+                    yaml,
+                    StandardCharsets.UTF_8
             );
 
+            try {
+
+                Files.move(
+                        temp,
+                        target,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+
+            } catch (AtomicMoveNotSupportedException e) {
+
+                Files.move(
+                        temp,
+                        target,
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            }
+
+        } catch (IOException e) {
+
+            try {
+                Files.deleteIfExists(temp);
+            } catch (IOException ignored) {
+            }
+
             throw new IllegalStateException(
-                    "Не удалось сохранить баланс игрока",
+                    "Не удалось сохранить accounts.yml",
                     e
             );
         }

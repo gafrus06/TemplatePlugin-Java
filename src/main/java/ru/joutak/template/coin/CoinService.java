@@ -9,24 +9,32 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
+
+import java.util.List;
 
 import java.util.Map;
 
 public class CoinService {
 
     private final NamespacedKey coinKey;
+    private static final float JOY_MODEL_DATA = 1001.0f;
 
     public CoinService(JavaPlugin plugin) {
         this.coinKey = new NamespacedKey(plugin, "joy_coin");
     }
 
     public ItemStack createCoin(int amount) {
-        ItemStack coin = new ItemStack(Material.GOLD_NUGGET, amount);
+        ItemStack coin =
+                new ItemStack(Material.GOLD_NUGGET, amount);
 
         ItemMeta meta = coin.getItemMeta();
 
         meta.displayName(
-                Component.text("Джой", NamedTextColor.GOLD)
+                Component.text(
+                        "Джой",
+                        NamedTextColor.GOLD
+                )
         );
 
         meta.getPersistentDataContainer().set(
@@ -34,6 +42,15 @@ public class CoinService {
                 PersistentDataType.BYTE,
                 (byte) 1
         );
+
+        CustomModelDataComponent modelData =
+                meta.getCustomModelDataComponent();
+
+        modelData.setFloats(
+                List.of(JOY_MODEL_DATA)
+        );
+
+        meta.setCustomModelDataComponent(modelData);
 
         coin.setItemMeta(meta);
 

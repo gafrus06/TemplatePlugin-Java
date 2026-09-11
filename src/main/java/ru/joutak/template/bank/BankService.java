@@ -18,7 +18,12 @@ public class BankService {
         return accountRepository.getBalance(playerId);
     }
 
+    public List<Transaction> getTransactions(UUID playerId) {
+        return accountRepository.getTransactions(playerId);
+    }
+
     public void deposit(UUID playerId, long amount) {
+
         if (amount <= 0) {
             throw new IllegalArgumentException(
                     "Сумма пополнения должна быть больше нуля"
@@ -27,25 +32,27 @@ public class BankService {
 
         long currentBalance = getBalance(playerId);
 
-        accountRepository.setBalance(
-                playerId,
-                currentBalance + amount
+        long newBalance = Math.addExact(
+                currentBalance,
+                amount
         );
 
-        accountRepository.addTransaction(
+        Transaction transaction = new Transaction(
+                TransactionType.DEPOSIT,
+                amount,
+                Instant.now()
+        );
+
+        accountRepository.applyTransaction(
                 playerId,
-                new Transaction(
-                        TransactionType.DEPOSIT,
-                        amount,
-                        Instant.now()
-                )
+                newBalance,
+                transaction
         );
     }
-    public List<Transaction> getTransactions(UUID playerId) {
-        return accountRepository.getTransactions(playerId);
-    }
+
 
     public boolean withdraw(UUID playerId, long amount) {
+
         if (amount <= 0) {
             return false;
         }
@@ -56,18 +63,19 @@ public class BankService {
             return false;
         }
 
-        accountRepository.setBalance(
-                playerId,
-                currentBalance - amount
+        long newBalance =
+                currentBalance - amount;
+
+        Transaction transaction = new Transaction(
+                TransactionType.WITHDRAW,
+                amount,
+                Instant.now()
         );
 
-        accountRepository.addTransaction(
+        accountRepository.applyTransaction(
                 playerId,
-                new Transaction(
-                        TransactionType.WITHDRAW,
-                        amount,
-                        Instant.now()
-                )
+                newBalance,
+                transaction
         );
 
         return true;
