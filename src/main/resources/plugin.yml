@@ -14,3 +14,8 @@ commands:
   joy:
     description: Основная команда JoyBank
     usage: /joy
+
+permissions:
+  joybank.admin.give:
+    description: Позволяет выдавать монеты Джой
+    default: op
