@@ -1,12 +1,16 @@
 name: ${NAME}
 version: ${VERSION}
 api-version: ${MINECRAFT_VERSION}
-main: ru.joutak.template.EmptyPlugin
+main: ru.joutak.template.JoyBankPlugin
 description: 'A template plugin'
-authors: ['EnderDissa', 'Stunnerer', 's4dnex']
+authors: ['russlan_1esse']
 contributors: ['technosimp']
 website: ${WEBSITE}
 
 depend: []
 libraries:
   - 'org.projectlombok:lombok:${LOMBOK_VERSION}'
+commands:
+  joy:
+    description: Основная команда JoyBank
+    usage: /joy
