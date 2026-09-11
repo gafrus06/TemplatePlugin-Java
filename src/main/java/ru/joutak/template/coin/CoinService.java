@@ -8,6 +8,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.inventory.PlayerInventory;
+
+import java.util.Map;
 
 public class CoinService {
 
@@ -52,5 +55,109 @@ public class CoinService {
                 coinKey,
                 PersistentDataType.BYTE
         );
+    }
+
+    public int countCoins(PlayerInventory inventory) {
+        int total = 0;
+
+        for (ItemStack item : inventory.getContents()) {
+            if (isCoin(item)) {
+                total += item.getAmount();
+            }
+        }
+
+        return total;
+    }
+    public boolean removeCoins(PlayerInventory inventory, int amount) {
+        if (amount <= 0) {
+            return false;
+        }
+
+        if (countCoins(inventory) < amount) {
+            return false;
+        }
+
+        int remaining = amount;
+
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack item = inventory.getItem(slot);
+
+            if (!isCoin(item)) {
+                continue;
+            }
+
+            int stackAmount = item.getAmount();
+
+            if (stackAmount <= remaining) {
+                remaining -= stackAmount;
+                inventory.setItem(slot, null);
+            } else {
+                item.setAmount(stackAmount - remaining);
+                remaining = 0;
+            }
+
+            if (remaining == 0) {
+                break;
+            }
+        }
+
+        return true;
+    }
+    public int getFreeCoinCapacity(PlayerInventory inventory) {
+        ItemStack template = createCoin(1);
+        int capacity = 0;
+
+        for (ItemStack item : inventory.getStorageContents()) {
+            if (item == null || item.getType().isAir()) {
+                capacity += template.getMaxStackSize();
+                continue;
+            }
+
+            if (item.isSimilar(template)) {
+                capacity += item.getMaxStackSize() - item.getAmount();
+            }
+        }
+        return capacity;
+    }
+
+    public boolean canFitCoins(
+            PlayerInventory inventory,
+            int amount
+    ) {
+        if (amount <= 0) {
+            return false;
+        }
+
+        return getFreeCoinCapacity(inventory) >= amount;
+    }
+    public boolean addCoins(
+            PlayerInventory inventory,
+            int amount
+    ) {
+        if (!canFitCoins(inventory, amount)) {
+            return false;
+        }
+
+        int remaining = amount;
+
+        while (remaining > 0) {
+            int stackAmount = Math.min(
+                    remaining,
+                    64
+            );
+
+            ItemStack stack = createCoin(stackAmount);
+
+            Map<Integer, ItemStack> leftovers =
+                    inventory.addItem(stack);
+
+            if (!leftovers.isEmpty()) {
+                return false;
+            }
+
+            remaining -= stackAmount;
+        }
+
+        return true;
     }
 }
