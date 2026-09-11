@@ -2,6 +2,8 @@ package ru.joutak.template.bank;
 
 import ru.joutak.template.storage.AccountRepository;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class BankService {
@@ -29,6 +31,18 @@ public class BankService {
                 playerId,
                 currentBalance + amount
         );
+
+        accountRepository.addTransaction(
+                playerId,
+                new Transaction(
+                        TransactionType.DEPOSIT,
+                        amount,
+                        Instant.now()
+                )
+        );
+    }
+    public List<Transaction> getTransactions(UUID playerId) {
+        return accountRepository.getTransactions(playerId);
     }
 
     public boolean withdraw(UUID playerId, long amount) {
@@ -45,6 +59,15 @@ public class BankService {
         accountRepository.setBalance(
                 playerId,
                 currentBalance - amount
+        );
+
+        accountRepository.addTransaction(
+                playerId,
+                new Transaction(
+                        TransactionType.WITHDRAW,
+                        amount,
+                        Instant.now()
+                )
         );
 
         return true;

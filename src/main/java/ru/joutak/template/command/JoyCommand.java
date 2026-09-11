@@ -8,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import ru.joutak.template.bank.BankService;
 import ru.joutak.template.coin.CoinService;
 import org.bukkit.entity.Player;
+import ru.joutak.template.bank.Transaction;
+
+import java.util.List;
 
 public class JoyCommand implements CommandExecutor {
 
@@ -32,6 +35,30 @@ public class JoyCommand implements CommandExecutor {
         }
         if(args.length == 0){
             player.sendMessage("Команда: /joy <give|balance>");
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("history")) {
+
+            List<Transaction> transactions =
+                    bankService.getTransactions(player.getUniqueId());
+
+            if (transactions.isEmpty()) {
+                player.sendMessage("История операций пуста.");
+                return true;
+            }
+
+            player.sendMessage("История операций:");
+
+            for (Transaction transaction : transactions) {
+                player.sendMessage(
+                        transaction.type()
+                                + " | "
+                                + transaction.amount()
+                                + " Джой | "
+                                + transaction.timestamp()
+                );
+            }
+
             return true;
         }
         if (args[0].equalsIgnoreCase("balance")) {
