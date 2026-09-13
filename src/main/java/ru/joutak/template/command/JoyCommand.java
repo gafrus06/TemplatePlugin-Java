@@ -3,7 +3,6 @@ package ru.joutak.template.command;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import ru.joutak.template.bank.BankService;
 import ru.joutak.template.coin.CoinService;
@@ -99,9 +98,15 @@ public class JoyCommand implements CommandExecutor {
                 return true;
             }
 
-            ItemStack coin = coinService.createCoin(amount);
+            boolean added = coinService.addCoins(
+                    player.getInventory(),
+                    amount
+            );
 
-            player.getInventory().addItem(coin);
+            if (!added) {
+                player.sendMessage("В инвентаре недостаточно места.");
+                return true;
+            }
 
             player.sendMessage("Вы получили " + amount + " Джой.");
 

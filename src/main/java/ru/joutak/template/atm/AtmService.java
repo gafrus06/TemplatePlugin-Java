@@ -39,9 +39,8 @@ public class AtmService {
                 signLocation.getBlockY(),
                 signLocation.getBlockZ()
         );
-
-        atms.put(atm.id(), atm);
         atmRepository.save(atm);
+        atms.put(atm.id(), atm);
 
         return atm;
     }
@@ -91,8 +90,9 @@ public class AtmService {
     }
 
     public void unregister(UUID atmId) {
-        atms.remove(atmId);
+
         atmRepository.delete(atmId);
+        atms.remove(atmId);
     }
     public Optional<Atm> findById(UUID atmId) {
         return Optional.ofNullable(

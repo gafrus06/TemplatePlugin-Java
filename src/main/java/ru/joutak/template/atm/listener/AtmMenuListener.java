@@ -1,4 +1,4 @@
-package ru.joutak.template.gui;
+package ru.joutak.template.atm.listener;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,6 +9,8 @@ import ru.joutak.template.atm.Atm;
 import ru.joutak.template.atm.AtmService;
 import ru.joutak.template.bank.BankService;
 import ru.joutak.template.coin.CoinService;
+import ru.joutak.template.gui.AtmMenu;
+import ru.joutak.template.gui.AtmMenuHolder;
 
 import java.util.Optional;
 

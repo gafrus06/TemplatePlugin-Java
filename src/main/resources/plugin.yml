@@ -4,7 +4,7 @@ api-version: ${MINECRAFT_VERSION}
 main: ru.joutak.template.JoyBankPlugin
 description: 'A template plugin'
 authors: ['russlan_1esse']
-contributors: ['technosimp']
+contributors: ['EnderDissa', 'Stunnerer', 's4dnex', 'technosimp']
 website: ${WEBSITE}
 
 depend: []

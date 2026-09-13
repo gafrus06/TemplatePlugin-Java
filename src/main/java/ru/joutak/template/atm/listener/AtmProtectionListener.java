@@ -28,38 +28,7 @@ public class AtmProtectionListener implements Listener {
         this.atmService = atmService;
     }
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
 
-        Block block = event.getBlock();
-
-        Optional<Atm> optionalAtm =
-                atmService.findByBlock(block.getLocation());
-        if (optionalAtm.isEmpty()) {
-            return;
-        }
-
-        Player player = event.getPlayer();
-
-        if (!player.hasPermission("joybank.atm.break")) {
-
-            event.setCancelled(true);
-
-            player.sendMessage(
-                    "Вы не можете разрушить зарегистрированный банкомат."
-            );
-
-            return;
-        }
-
-        Atm atm = optionalAtm.get();
-
-        atmService.unregister(atm.id());
-
-        player.sendMessage(
-                "Банкомат удалён."
-        );
-    }
     @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         event.blockList().removeIf(this::isAtmBlock);
